@@ -9,6 +9,7 @@ import api from '../../services/api'
 function Main({ navigation }) {
   const [devs, setDevs] = useState([])
   const [currentRegion, setCurrentRegion] = useState(null)
+  const [techs, setTechs] = useState('')
 
   useEffect(() => {
     async function loadInitialPosition() {
@@ -36,15 +37,21 @@ function Main({ navigation }) {
   async function loadDevs() {
     const { latitude, longitude } = currentRegion
 
-    const response = await api.get('/search', {
-      params: {
-        latitude,
-        longitude,
-        techs: 'ReactJS'
-      }
-    })
-    console.log(response.data)
-    setDevs(response.data)
+    try {
+      const response = await api.get('/search', {
+        params: {
+          latitude,
+          longitude,
+          techs
+        }
+      })
+
+      setDevs(response.data)
+    } catch (err) {
+      console.log({ Erro: err })
+    }
+
+
   }
 
   function handleRegionChanged(region) {
@@ -74,7 +81,7 @@ function Main({ navigation }) {
             }}>
               <View style={styles.callout}>
                 <Text style={styles.devName}>{dev.name}</Text>
-                <Text style={styles.devBio}>{dev.bio}</Text>
+                <Text style={styles.devBio}>{dev.bio ? dev.bio : "Nenhuma informação..."}</Text>
                 <Text style={styles.devTechs}>{dev.techs.join(', ')}</Text>
               </View>
             </Callout>
@@ -88,6 +95,7 @@ function Main({ navigation }) {
           placeholderTextColor="#999"
           autoCapitalize="words"
           autoCorrect={false}
+          onChangeText={setTechs}
         />
 
         <TouchableOpacity style={styles.loadButton} onPress={loadDevs}>
